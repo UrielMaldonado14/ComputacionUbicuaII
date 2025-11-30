@@ -1,0 +1,35 @@
+
+DHT dht(DHTPIN, DHTTYPE);
+
+int sensorSuelo = A0;
+int sensorLDR = A1;
+int sensorIR = 3;
+
+void setup() {
+  Serial.begin(9600);
+  dht.begin();
+
+  pinMode(sensorIR, INPUT);
+}
+
+void loop() {
+
+  int humedadSuelo = analogRead(sensorSuelo);
+
+  int luz = analogRead(sensorLDR);
+
+  int ir = digitalRead(sensorIR);
+
+  float temperatura = dht.readTemperature();
+  float humedadAmb = dht.readHumidity();
+
+  Serial.print("{");
+  Serial.print("\"humedad_suelo\":"); Serial.print(humedadSuelo); Serial.print(",");
+  Serial.print("\"luz\":"); Serial.print(luz); Serial.print(",");
+  Serial.print("\"temperatura\":"); Serial.print(temperatura); Serial.print(",");
+  Serial.print("\"humedad\":"); Serial.print(humedadAmb); Serial.print(",");
+  Serial.print("\"infrarrojo\":"); Serial.print(ir);
+  Serial.println("}");
+
+  delay(1000);
+}
