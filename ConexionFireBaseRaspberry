@@ -1,0 +1,16 @@
+import urequests as requests
+
+class Firebase:
+    def _init_(self, url):
+        if not url.endswith('/'):
+            url += '/'
+        self.url = url
+
+    def send(self, path, data):
+        try:
+            r = requests.put(self.url + path + ".json", json=data)
+            r.close()
+            return True
+        except Exception as e:
+            print("Error enviando a Firebase:", e)
+            return False
