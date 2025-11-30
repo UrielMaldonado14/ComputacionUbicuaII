@@ -1,0 +1,59 @@
+import network
+import time
+import json
+from machine import UART, Pin
+from firebase import Firebase
+
+WIFI_SSID = ""
+WIFI_PASS = ""
+
+FIREBASE_URL = "https://sensores-82a05-default-rtdb.firebaseio.com/"
+
+db = Firebase(FIREBASE_URL)
+
+uart = UART(0, baudrate=9600, tx=Pin(0), rx=Pin(1))
+
+def conectar_wifi():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+
+    if not wlan.isconnected():
+        print("Conectando a WiFi...")
+        wlan.connect(WIFI_SSID, WIFI_PASS)
+
+        while not wlan.isconnected():
+            time.sleep(0.5)
+
+    print("Conectado a red WiFi:", wlan.ifconfig())
+
+conectar_wifi()
+
+print("Esperando datos del Arduino...")
+
+while True:
+    try:
+        if uart.any():
+            raw = uart.readline()
+
+            if raw:
+                try:
+                    data_str = raw.decode().strip()
+                    print("Recibido:", data_str)
+
+             
+                    data_json = json.loads(data_str)
+
+                   
+                    enviado = db.send("sensores", data_json)
+
+                    if enviado:
+                        print("Datos enviados correctamente\n")
+                    else:
+                        print("Error al enviar datos\n")
+
+                except Exception as e:
+                    print("Error procesando JSON:", e)
+    except Exception as e:
+        print("Error UART:", e)
+
+    time.sleep(0.2)
